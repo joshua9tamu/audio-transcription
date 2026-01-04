@@ -57,6 +57,57 @@ main {
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Tab Selector */
+.tab-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 8px;
+    border-radius: 12px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 15px 20px;
+    border: none;
+    background: transparent;
+    color: #8892b0;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, #00d9ff, #00ff88);
+    color: #1a1a2e;
+}
+
+.tab-btn i {
+    font-size: 1.2rem;
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Upload Section */
 .upload-section {
     display: flex;
     flex-direction: column;
@@ -160,6 +211,117 @@ main {
     border-radius: 8px;
 }
 
+/* YouTube Section */
+.youtube-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.youtube-input-container {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 5px 15px;
+    transition: all 0.3s ease;
+}
+
+.youtube-input-container:focus-within {
+    border-color: #ff0000;
+    background: rgba(255, 0, 0, 0.05);
+}
+
+.youtube-icon {
+    font-size: 1.8rem;
+    color: #ff0000;
+    margin-right: 15px;
+}
+
+.youtube-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    padding: 15px 0;
+    outline: none;
+}
+
+.youtube-input::placeholder {
+    color: #6c7a96;
+}
+
+.clear-url {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #8892b0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.clear-url:hover {
+    background: rgba(255, 107, 107, 0.3);
+    color: #ff6b6b;
+}
+
+.youtube-hint {
+    color: #6c7a96;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.youtube-hint i {
+    color: #00d9ff;
+}
+
+.video-preview {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid rgba(255, 0, 0, 0.2);
+}
+
+.video-thumbnail {
+    width: 120px;
+    height: 68px;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.video-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.video-info {
+    flex: 1;
+}
+
+.video-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Buttons */
 .transcribe-btn {
     background: linear-gradient(135deg, #00d9ff, #00ff88);
     border: none;
@@ -186,6 +348,15 @@ main {
     cursor: not-allowed;
 }
 
+.youtube-btn {
+    background: linear-gradient(135deg, #ff0000, #ff4444);
+}
+
+.youtube-btn:hover:not(:disabled) {
+    box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+}
+
+/* Progress Section */
 .progress-section {
     display: none;
     margin-top: 30px;
@@ -222,6 +393,7 @@ main {
     50% { opacity: 0.5; }
 }
 
+/* Result Section */
 .result-section {
     display: none;
     margin-top: 30px;
@@ -310,6 +482,7 @@ main {
     color: #00d9ff;
 }
 
+/* Error Section */
 .error-section {
     display: none;
     margin-top: 30px;
@@ -350,6 +523,7 @@ main {
     background: rgba(255, 107, 107, 0.4);
 }
 
+/* Footer */
 footer {
     text-align: center;
     margin-top: 40px;
@@ -365,6 +539,7 @@ footer a:hover {
     text-decoration: underline;
 }
 
+/* Loading Spinner */
 .loading {
     display: inline-block;
     width: 20px;
@@ -379,6 +554,7 @@ footer a:hover {
     to { transform: rotate(360deg); }
 }
 
+/* Toast */
 .toast {
     position: fixed;
     bottom: 30px;
@@ -404,6 +580,7 @@ footer a:hover {
     color: #fff;
 }
 
+/* Responsive */
 @media (max-width: 600px) {
     .container {
         padding: 20px 15px;
@@ -415,6 +592,10 @@ footer a:hover {
     
     .logo h1 {
         font-size: 1.5rem;
+    }
+    
+    .tab-selector {
+        flex-direction: column;
     }
     
     .upload-area {
@@ -434,5 +615,15 @@ footer a:hover {
     .result-stats {
         flex-direction: column;
         gap: 10px;
+    }
+    
+    .video-preview {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .video-thumbnail {
+        width: 100%;
+        height: 150px;
     }
 }

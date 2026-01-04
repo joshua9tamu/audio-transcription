@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Transcription</title>
+    <title>Audio & YouTube Transcription</title>
     <link rel="stylesheet" href="/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,41 +15,86 @@
                 <i class="fas fa-microphone-alt"></i>
                 <h1>Audio Transcription</h1>
             </div>
-            <p class="subtitle">Convert audio to text using AI</p>
+            <p class="subtitle">Convert audio files or YouTube videos to text</p>
         </header>
 
         <main>
-            <div class="upload-section">
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                    </div>
-                    <h3>Drop your audio file here</h3>
-                    <p>or click to browse</p>
-                    <p class="file-types">MP3, WAV, M4A, FLAC, OGG (Max 100MB)</p>
-                    <input type="file" id="audioInput" accept=".mp3,.wav,.m4a,.flac,.ogg,audio/*" hidden>
-                </div>
-
-                <div class="file-info" id="fileInfo">
-                    <div class="file-details">
-                        <i class="fas fa-music"></i>
-                        <div class="file-text">
-                            <span class="file-name" id="fileName"></span>
-                            <span class="file-size" id="fileSize"></span>
-                        </div>
-                        <button class="remove-file" id="removeFile">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <audio id="audioPreview" controls></audio>
-                </div>
-
-                <button class="transcribe-btn" id="transcribeBtn" disabled>
-                    <i class="fas fa-language"></i>
-                    <span>Transcribe Audio</span>
+            <!-- Tab Selector -->
+            <div class="tab-selector">
+                <button class="tab-btn active" data-tab="upload">
+                    <i class="fas fa-file-audio"></i>
+                    Upload Audio
+                </button>
+                <button class="tab-btn" data-tab="youtube">
+                    <i class="fab fa-youtube"></i>
+                    YouTube Video
                 </button>
             </div>
 
+            <!-- Upload Audio Tab -->
+            <div class="tab-content active" id="upload-tab">
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h3>Drop your audio file here</h3>
+                        <p>or click to browse</p>
+                        <p class="file-types">MP3, WAV, M4A, FLAC, OGG (Max 100MB)</p>
+                        <input type="file" id="audioInput" accept=".mp3,.wav,.m4a,.flac,.ogg,audio/*" hidden>
+                    </div>
+
+                    <div class="file-info" id="fileInfo">
+                        <div class="file-details">
+                            <i class="fas fa-music"></i>
+                            <div class="file-text">
+                                <span class="file-name" id="fileName"></span>
+                                <span class="file-size" id="fileSize"></span>
+                            </div>
+                            <button class="remove-file" id="removeFile">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <audio id="audioPreview" controls></audio>
+                    </div>
+
+                    <button class="transcribe-btn" id="transcribeBtn" disabled>
+                        <i class="fas fa-language"></i>
+                        <span>Transcribe Audio</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- YouTube Tab -->
+            <div class="tab-content" id="youtube-tab">
+                <div class="youtube-section">
+                    <div class="youtube-input-container">
+                        <i class="fab fa-youtube youtube-icon"></i>
+                        <input type="text" id="youtubeUrl" placeholder="Paste YouTube URL here..." class="youtube-input">
+                        <button class="clear-url" id="clearUrl" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <p class="youtube-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Supports youtube.com and youtu.be links
+                    </p>
+
+                    <div class="video-preview" id="videoPreview" style="display: none;">
+                        <div class="video-thumbnail" id="videoThumbnail"></div>
+                        <div class="video-info">
+                            <span class="video-title" id="videoTitle">Video Title</span>
+                        </div>
+                    </div>
+
+                    <button class="transcribe-btn youtube-btn" id="youtubeTranscribeBtn" disabled>
+                        <i class="fas fa-language"></i>
+                        <span>Transcribe Video</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Section -->
             <div class="progress-section" id="progressSection">
                 <div class="progress-container">
                     <div class="progress-bar" id="progressBar"></div>
@@ -57,6 +102,7 @@
                 <p class="progress-text" id="progressText">Processing...</p>
             </div>
 
+            <!-- Result Section -->
             <div class="result-section" id="resultSection">
                 <div class="result-header">
                     <h2><i class="fas fa-file-alt"></i> Transcription</h2>
@@ -76,6 +122,7 @@
                 </div>
             </div>
 
+            <!-- Error Section -->
             <div class="error-section" id="errorSection">
                 <i class="fas fa-exclamation-triangle"></i>
                 <p id="errorMessage"></p>

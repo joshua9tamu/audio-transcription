@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Tab Elements
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    // Upload Elements
     const uploadArea = document.getElementById('uploadArea');
     const audioInput = document.getElementById('audioInput');
     const fileInfo = document.getElementById('fileInfo');
@@ -7,6 +12,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const removeFile = document.getElementById('removeFile');
     const audioPreview = document.getElementById('audioPreview');
     const transcribeBtn = document.getElementById('transcribeBtn');
+
+    // YouTube Elements
+    const youtubeUrl = document.getElementById('youtubeUrl');
+    const clearUrl = document.getElementById('clearUrl');
+    const videoPreview = document.getElementById('videoPreview');
+    const videoThumbnail = document.getElementById('videoThumbnail');
+    const videoTitle = document.getElementById('videoTitle');
+    const youtubeTranscribeBtn = document.getElementById('youtubeTranscribeBtn');
+
+    // Common Elements
     const progressSection = document.getElementById('progressSection');
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
@@ -21,7 +36,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const retryBtn = document.getElementById('retryBtn');
 
     let selectedFile = null;
+    let currentTab = 'upload';
 
+    // --- Tab Switching ---
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.dataset.tab;
+            currentTab = tab;
+
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+                if (content.id === `${tab}-tab`) {
+                    content.classList.add('active');
+                }
+            });
+
+            resetUI();
+        });
+    });
+
+    // --- Utility Functions ---
     function formatFileSize(bytes) {
         if (bytes === 0) return '0 Bytes';
         const k = 1024;
@@ -30,209 +67,204 @@ document.addEventListener('DOMContentLoaded', function() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
-    function showToast(message, isError = false) {
-        const existingToast = document.querySelector('.toast');
-        if (existingToast) existingToast.remove();
+    function resetUI() {
+        resultSection.classList.remove('show');
+        errorSection.classList.remove('show');
+        progressSection.classList.remove('show');
+        progressBar.style.width = '0%';
+    }
 
+    function updateStats(text) {
+        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        wordCount.textContent = words;
+        charCount.textContent = text.length;
+    }
+
+    function showToast(message, isError = false) {
         const toast = document.createElement('div');
-        toast.className = `toast ${isError ? 'error' : ''}`;
+        toast.className = `toast ${isError ? 'error' : ''} show`;
         toast.textContent = message;
         document.body.appendChild(toast);
-
-        setTimeout(() => toast.classList.add('show'), 100);
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
 
-    function handleFileSelect(file) {
-        if (!file) return;
-
-        const validExtensions = ['mp3', 'wav', 'm4a', 'flac', 'ogg'];
-        const fileExtension = file.name.split('.').pop().toLowerCase();
-
-        if (!validExtensions.includes(fileExtension)) {
-            showToast('Invalid file type. Use MP3, WAV, M4A, FLAC, or OGG.', true);
-            return;
-        }
-
-        const maxSize = 100 * 1024 * 1024; // 100MB
-        if (file.size > maxSize) {
-            showToast('File too large. Max 100MB.', true);
-            return;
-        }
-
-        selectedFile = file;
-        fileName.textContent = file.name;
-        fileSize.textContent = formatFileSize(file.size);
-
-        const audioURL = URL.createObjectURL(file);
-        audioPreview.src = audioURL;
-
-        uploadArea.style.display = 'none';
-        fileInfo.classList.add('show');
-        transcribeBtn.disabled = false;
-
-        resultSection.classList.remove('show');
-        errorSection.classList.remove('show');
-    }
-
+    // --- File Upload Logic ---
     uploadArea.addEventListener('click', () => audioInput.click());
-
-    audioInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
 
     uploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
         uploadArea.classList.add('dragover');
     });
 
-    uploadArea.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-    });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
 
     uploadArea.addEventListener('drop', (e) => {
         e.preventDefault();
         uploadArea.classList.remove('dragover');
-        handleFileSelect(e.dataTransfer.files[0]);
+        if (e.dataTransfer.files.length) {
+            handleFileSelect(e.dataTransfer.files[0]);
+        }
     });
+
+    audioInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    function handleFileSelect(file) {
+        if (!file.type.startsWith('audio/') && !file.name.match(/\.(mp3|wav|m4a|flac|ogg)$/i)) {
+            showToast('Please select a valid audio file.', true);
+            return;
+        }
+
+        selectedFile = file;
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            audioPreview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+
+        fileInfo.classList.add('show');
+        uploadArea.style.display = 'none';
+        transcribeBtn.disabled = false;
+        resetUI();
+    }
 
     removeFile.addEventListener('click', () => {
         selectedFile = null;
         audioInput.value = '';
-        audioPreview.src = '';
-        uploadArea.style.display = 'block';
         fileInfo.classList.remove('show');
+        uploadArea.style.display = 'block';
         transcribeBtn.disabled = true;
-        resultSection.classList.remove('show');
-        errorSection.classList.remove('show');
+        audioPreview.src = '';
     });
 
-    transcribeBtn.addEventListener('click', async () => {
-        if (!selectedFile) return;
+    // --- YouTube Logic ---
+    youtubeUrl.addEventListener('input', (e) => {
+        const url = e.target.value.trim();
+        clearUrl.style.display = url ? 'flex' : 'none';
+        
+        // Simple regex to check if it looks like a YouTube URL
+        const isYouTube = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(url);
+        youtubeTranscribeBtn.disabled = !isYouTube;
+        
+        if (isYouTube) {
+            const videoId = extractVideoId(url);
+            if (videoId) {
+                videoThumbnail.innerHTML = `<img src="https://img.youtube.com/vi/${videoId}/mqdefault.jpg" alt="thumbnail">`;
+                videoPreview.style.display = 'flex';
+            }
+        } else {
+            videoPreview.style.display = 'none';
+        }
+    });
 
+    clearUrl.addEventListener('click', () => {
+        youtubeUrl.value = '';
+        clearUrl.style.display = 'none';
+        videoPreview.style.display = 'none';
+        youtubeTranscribeBtn.disabled = true;
+    });
+
+    function extractVideoId(url) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    // --- Transcription Execution ---
+    async function startTranscription() {
+        resetUI();
         progressSection.classList.add('show');
-        resultSection.classList.remove('show');
-        errorSection.classList.remove('show');
-        transcribeBtn.disabled = true;
-        transcribeBtn.innerHTML = '<span class="loading"></span> <span>Processing...</span>';
+        progressText.textContent = "Starting process...";
+        
+        const formData = new FormData();
+        let endpoint = '/api/transcribe';
+        let options = {};
 
+        if (currentTab === 'upload') {
+            formData.append('audio', selectedFile);
+            options = { method: 'POST', body: formData };
+            transcribeBtn.disabled = true;
+        } else {
+            endpoint = '/api/transcribe-youtube';
+            options = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: youtubeUrl.value.trim() })
+            };
+            youtubeTranscribeBtn.disabled = true;
+        }
+
+        // Fake progress increments to keep user engaged
         let progress = 0;
-        const progressInterval = setInterval(() => {
-            progress += Math.random() * 5;
-            if (progress > 90) progress = 90;
-            progressBar.style.width = progress + '%';
-        }, 1000);
-
-        progressText.textContent = 'Uploading and processing...';
+        const interval = setInterval(() => {
+            if (progress < 90) {
+                progress += Math.random() * 5;
+                progressBar.style.width = `${Math.min(progress, 90)}%`;
+                
+                if (progress < 30) progressText.textContent = "Uploading/Downloading...";
+                else if (progress < 60) progressText.textContent = "Processing audio...";
+                else progressText.textContent = "Transcribing with AI...";
+            }
+        }, 2000);
 
         try {
-            const formData = new FormData();
-            formData.append('audio', selectedFile);
-
-            const response = await fetch('/api/transcribe', {
-                method: 'POST',
-                body: formData
-            });
-
-            clearInterval(progressInterval);
-
+            const response = await fetch(endpoint, options);
             const data = await response.json();
 
-            if (!response.ok || data.error) {
+            clearInterval(interval);
+
+            if (data.success) {
+                progressBar.style.width = '100%';
+                progressText.textContent = "Complete!";
+                
+                setTimeout(() => {
+                    progressSection.classList.remove('show');
+                    resultSection.classList.add('show');
+                    transcriptionText.value = data.transcription;
+                    updateStats(data.transcription);
+                }, 500);
+            } else {
                 throw new Error(data.error || 'Transcription failed');
             }
-
-            progressBar.style.width = '100%';
-            progressText.textContent = 'Complete!';
-
-            setTimeout(() => {
-                progressSection.classList.remove('show');
-                resultSection.classList.add('show');
-
-                const text = data.transcription || '';
-                transcriptionText.value = text;
-
-                const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-                wordCount.textContent = words;
-                charCount.textContent = text.length;
-
-                showToast('Transcription completed!');
-            }, 500);
-
-        } catch (error) {
-            clearInterval(progressInterval);
-            console.error('Error:', error);
+        } catch (err) {
+            clearInterval(interval);
             progressSection.classList.remove('show');
             errorSection.classList.add('show');
-            errorMessage.textContent = error.message || 'An error occurred';
+            errorMessage.textContent = err.message;
         } finally {
-            transcribeBtn.disabled = false;
-            transcribeBtn.innerHTML = '<i class="fas fa-language"></i> <span>Transcribe Audio</span>';
-            progressBar.style.width = '0%';
+            transcribeBtn.disabled = (selectedFile === null);
+            youtubeTranscribeBtn.disabled = (youtubeUrl.value.trim() === '');
         }
-    });
+    }
 
-    copyBtn.addEventListener('click', async () => {
-        const text = transcriptionText.value;
-        if (!text) {
-            showToast('No text to copy', true);
-            return;
-        }
+    transcribeBtn.addEventListener('click', startTranscription);
+    youtubeTranscribeBtn.addEventListener('click', startTranscription);
+    retryBtn.addEventListener('click', startTranscription);
 
-        try {
-            await navigator.clipboard.writeText(text);
-            showToast('Copied to clipboard!');
-            copyBtn.innerHTML = '<i class="fas fa-check"></i>';
-            setTimeout(() => {
-                copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
-            }, 2000);
-        } catch (err) {
-            transcriptionText.select();
-            document.execCommand('copy');
-            showToast('Copied!');
-        }
+    // --- Action Buttons ---
+    copyBtn.addEventListener('click', () => {
+        transcriptionText.select();
+        document.execCommand('copy');
+        showToast('Copied to clipboard!');
     });
 
     downloadBtn.addEventListener('click', () => {
         const text = transcriptionText.value;
-        if (!text) {
-            showToast('No text to download', true);
-            return;
-        }
-
         const blob = new Blob([text], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
+        const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        
-        const name = selectedFile ? selectedFile.name.replace(/\.[^/.]+$/, '') : 'transcription';
         a.href = url;
-        a.download = `${name}_transcription.txt`;
-        document.body.appendChild(a);
+        a.download = `transcription_${Date.now()}.txt`;
         a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        showToast('Downloaded!');
-        downloadBtn.innerHTML = '<i class="fas fa-check"></i>';
-        setTimeout(() => {
-            downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
-        }, 2000);
-    });
-
-    retryBtn.addEventListener('click', () => {
-        errorSection.classList.remove('show');
-        if (selectedFile) {
-            transcribeBtn.click();
-        }
-    });
-
-    // Prevent default drag behavior
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        document.body.addEventListener(eventName, (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-        }, false);
+        window.URL.revokeObjectURL(url);
     });
 });
