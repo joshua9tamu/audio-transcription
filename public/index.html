@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Transcription</title>
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-microphone-alt"></i>
+                <h1>Audio Transcription</h1>
+            </div>
+            <p class="subtitle">Convert audio to text using AI</p>
+        </header>
+
+        <main>
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h3>Drop your audio file here</h3>
+                    <p>or click to browse</p>
+                    <p class="file-types">MP3, WAV, M4A, FLAC, OGG (Max 100MB)</p>
+                    <input type="file" id="audioInput" accept=".mp3,.wav,.m4a,.flac,.ogg,audio/*" hidden>
+                </div>
+
+                <div class="file-info" id="fileInfo">
+                    <div class="file-details">
+                        <i class="fas fa-music"></i>
+                        <div class="file-text">
+                            <span class="file-name" id="fileName"></span>
+                            <span class="file-size" id="fileSize"></span>
+                        </div>
+                        <button class="remove-file" id="removeFile">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <audio id="audioPreview" controls></audio>
+                </div>
+
+                <button class="transcribe-btn" id="transcribeBtn" disabled>
+                    <i class="fas fa-language"></i>
+                    <span>Transcribe Audio</span>
+                </button>
+            </div>
+
+            <div class="progress-section" id="progressSection">
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <p class="progress-text" id="progressText">Processing...</p>
+            </div>
+
+            <div class="result-section" id="resultSection">
+                <div class="result-header">
+                    <h2><i class="fas fa-file-alt"></i> Transcription</h2>
+                    <div class="result-actions">
+                        <button class="action-btn" id="copyBtn" title="Copy">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="action-btn" id="downloadBtn" title="Download">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <textarea id="transcriptionText" readonly></textarea>
+                <div class="result-stats">
+                    <span><i class="fas fa-font"></i> <span id="wordCount">0</span> words</span>
+                    <span><i class="fas fa-text-width"></i> <span id="charCount">0</span> chars</span>
+                </div>
+            </div>
+
+            <div class="error-section" id="errorSection">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p id="errorMessage"></p>
+                <button class="retry-btn" id="retryBtn">Try Again</button>
+            </div>
+        </main>
+
+        <footer>
+            <p>Powered by <a href="https://soniox.com" target="_blank">Soniox</a></p>
+        </footer>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+</html>
