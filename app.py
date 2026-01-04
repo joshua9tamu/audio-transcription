@@ -4,6 +4,7 @@ import requests
 import time
 import tempfile
 import subprocess
+import yt_dlp
 
 app = Flask(__name__, static_folder='public')
 
@@ -150,7 +151,6 @@ def is_valid_youtube_url(url):
 def download_youtube_audio(url):
     """Download audio from YouTube video using yt-dlp"""
     try:
-        import yt_dlp
 
         # Create temp directory
         temp_dir = tempfile.mkdtemp()
